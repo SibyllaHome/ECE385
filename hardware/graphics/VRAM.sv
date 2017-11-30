@@ -1,5 +1,4 @@
 module VRAM (
-	input logic CLK_100, RESET_H,
 	// VRAM Interface
 	input logic VRAM_READ_SPRITE,
 	input logic[9:0] VRAM_X, VRAM_Y,
@@ -40,11 +39,7 @@ module VRAM (
 	// Data signals from tristate buffer
 	logic[16:0] Data_to_SRAM, Data_from_SRAM;
 	
-	// assign data_from_sram into rgb
-	assign VRAM_RGB = (~upperEn_N) ? Data_from_SRAM[15:8] : Data_from_SRAM[7:0];
-	
-	tristate #(.N(16)) tr0(
-    .Clk(CLK_100), .tristate_output_enable(~SRAM_WE_N), .Data_write(Data_to_SRAM), .Data_read(Data_from_SRAM), .Data(SRAM_DQ)
-	);
+	// assign data from sram into rgb, no need for tristate since we won't be writing to sram from hardware
+	assign VRAM_RGB = (~upperEn_N) ? SRAM_DQ[15:8] : SRAM_DQ[7:0];
 endmodule
 			

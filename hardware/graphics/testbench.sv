@@ -13,7 +13,7 @@ logic [19:0] SRAM_ADDR;
 wire [15:0] SRAM_DQ; //tristate buffers need to be of type wire
 
 // Instantiating the cpu
-graphics_wrapper gw(.CLK_100(Clk), .*);
+graphics_wrapper gw(.CLK_50(Clk), .*);
 
 // Toggle the clock
 // #1 means wait for a delay of 1 timeunit

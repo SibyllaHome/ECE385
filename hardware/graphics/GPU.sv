@@ -16,7 +16,7 @@
 // color_mapper: Decide which color to be output to VGA for each pixel.
 module GPU (
 					// 25MHz VGA clock and 100MHz memory clock
-					input logic VGA_CLK, CLK_100,
+					input logic VGA_CLK,
 					// VGA draw location
 					input logic	[9:0] DrawX, DrawY,      
 					// Data from CPU

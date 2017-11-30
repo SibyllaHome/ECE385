@@ -31,8 +31,11 @@ for y in xrange(0,h):
         b = b >> 6
         o = r + g + b
 
-        f.write(bin(o).lstrip('-0b').zfill(8))
-        if (x % 2 == 1): f.write("\n")
+        b_string = bin(o).lstrip('-0b').zfill(8)
+        if (x % 2 == 0):
+            f.write("mem_array[" + str((y*w+x)/2) + "] = 16'b" + b_string)
+        if (x % 2 == 1):
+            f.write(b_string + ";\n")
 
 im_out.save("../assets/converted.jpg")
 f.close()

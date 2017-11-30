@@ -1,7 +1,7 @@
 // toplevel for graphics module
 
 
-module graphics_wrapper( input  logic        CLK_100, RESET_H,
+module graphics_wrapper( input  logic        CLK_50, RESET_H,
 								 output logic [7:0]  VGA_R,        //VGA Red
 															VGA_G,        //VGA Green
 															VGA_B,        //VGA Blue
@@ -15,13 +15,9 @@ module graphics_wrapper( input  logic        CLK_100, RESET_H,
 								output logic [19:0] SRAM_ADDR,
 								inout wire [15:0] SRAM_DQ //tristate buffers need to be of type wire
 								);
-	logic CLK_50 = 0;						
+								
 	logic CLK_25 = 0;
 	assign VGA_CLK = CLK_25;
-	// divide CLK_50 by 2 to get CLK_25
-	always_ff @ (posedge CLK_100) begin
-        CLK_50 <= ~CLK_50;
-	end
 	always_ff @ (posedge CLK_50) begin
         CLK_25 <= ~CLK_25;
 	end
@@ -29,7 +25,7 @@ module graphics_wrapper( input  logic        CLK_100, RESET_H,
 	logic[9:0] DrawX, DrawY;
 	
 	// VGA hardware controller
-	VGA_controller vga_controller_instance(.Clk(CLK_100), .Reset(RESET_H), .VGA_HS, .VGA_VS, .VGA_CLK(CLK_25), .VGA_BLANK_N, .VGA_SYNC_N, .DrawX, .DrawY);
+	VGA_controller vga_controller_instance(.Clk(CLK_50), .Reset(RESET_H), .VGA_HS, .VGA_VS, .VGA_CLK(VGA_CLK), .VGA_BLANK_N, .VGA_SYNC_N, .DrawX, .DrawY);
 	
 	// VRAM Control 
 	logic VRAM_READ_SPRITE;
