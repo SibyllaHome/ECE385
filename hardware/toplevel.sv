@@ -10,7 +10,7 @@ University of Illinois ECE Department
 
 module toplevel (
 	input  logic        CLOCK_50,
-	input  logic [1:0]  KEY,
+	input  logic [3:0]  KEY,
 	output logic [7:0]  LEDG,
 	output logic [17:0] LEDR,
 	output logic [6:0]  HEX0,
@@ -31,6 +31,8 @@ module toplevel (
 	output logic        DRAM_RAS_N,
 	output logic        DRAM_WE_N,
 	output logic        DRAM_CLK
+	input  logic		  PS2_KBCLK
+	input  logic		  PS2_KBDAT
 );
 
 logic[15:0] EXPORT;
@@ -52,22 +54,21 @@ nios_system system (
 	.sdram_clk_clk(DRAM_CLK)						// Clock out to SDRAM
 );
 
-// Display the first 4 and the last 4 hex values of the received message
+assign LEDR[15:0] = EXPORT;
+
+// Instantiate Keyboard
+logic[7:0] keyCode;
+logic press;
+keyboard kb_0(.Clk(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .reset(~KEY[0]), .keyCode(keyCode), .press(press));
+
+// Display Keycode
 HexDriver hexdrv0 (
-	.In(EXPORT[3:0]),
+	.In(keyCode[3:0]),
    .Out(HEX0)
 );
 HexDriver hexdrv1 (
-	.In(EXPORT[7:4]),
+	.In(keyCode[7:4]),
    .Out(HEX1)
-);
-HexDriver hexdrv2 (
-	.In(EXPORT[11:8]),
-   .Out(HEX2)
-);
-HexDriver hexdrv3 (
-	.In(EXPORT[15:12]),
-   .Out(HEX3)
 );
 endmodule
 

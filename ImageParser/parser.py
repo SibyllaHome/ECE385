@@ -1,7 +1,8 @@
 from PIL import Image
 
-im = Image.open('../assets/Background.jpg')
+im = Image.open('../assets/background.jpg')
 f = open('../assets/memory_content.txt','w')
+hexfile = open('../assets/content.hex','w')
 
 # get size
 (w , h) = im.size
@@ -32,6 +33,7 @@ for y in xrange(0,h):
         o = r + g + b
 
         b_string = bin(o).lstrip('-0b').zfill(8)
+        hexfile.write(hex(o).lstrip('-0x').zfill(2))
         if (x % 2 == 0):
             f.write("mem_array[" + str((y*w+x)/2) + "] = 16'b" + b_string)
         if (x % 2 == 1):
@@ -39,3 +41,4 @@ for y in xrange(0,h):
 
 im_out.save("../assets/converted.jpg")
 f.close()
+hexfile.close()

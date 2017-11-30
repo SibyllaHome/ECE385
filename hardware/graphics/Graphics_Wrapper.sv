@@ -1,19 +1,19 @@
 // toplevel for graphics module
 
 
-module graphics_wrapper( input  logic        CLK_50, RESET_H,
-								 output logic [7:0]  VGA_R,        //VGA Red
-															VGA_G,        //VGA Green
-															VGA_B,        //VGA Blue
-								 output logic        VGA_CLK,      //VGA Clock
-															VGA_SYNC_N,   //VGA Sync signal
-															VGA_BLANK_N,  //VGA Blank signal
-															VGA_VS,       //VGA virtical sync signal
-															VGA_HS,       //VGA horizontal sync signal
-								// SRAM passthrough
-								output logic SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
-								output logic [19:0] SRAM_ADDR,
-								inout wire [15:0] SRAM_DQ //tristate buffers need to be of type wire
+module graphics_wrapper( 	input  logic        CLK_50, RESET_H,
+									output logic [7:0]  VGA_R,        //VGA Red
+															  VGA_G,        //VGA Green
+															  VGA_B,        //VGA Blue
+									output logic        VGA_CLK,      //VGA Clock
+															  VGA_SYNC_N,   //VGA Sync signal
+															  VGA_BLANK_N,  //VGA Blank signal
+															  VGA_VS,       //VGA virtical sync signal
+															  VGA_HS,       //VGA horizontal sync signal
+									// SRAM passthrough
+									output logic SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
+									output logic [19:0] SRAM_ADDR,
+									inout wire [15:0] SRAM_DQ //tristate buffers need to be of type wire
 								);
 								
 	logic CLK_25 = 0;
@@ -51,7 +51,7 @@ module graphics_wrapper( input  logic        CLK_50, RESET_H,
 	VRAM vram_instance(.*);
 	
 	// TEST SRAM for simulation
-   test_memory tm_inst(.Clk(CLK_50), .Reset(RESET_H), .I_O(SRAM_DQ), .A(SRAM_ADDR), .CE(SRAM_CE_N), .UB(SRAM_UB_N), .LB(SRAM_LB_N), .OE(SRAM_OE_N), .WE(SRAM_WE_N));
+//   test_memory tm_inst(.Clk(CLK_50), .Reset(RESET_H), .I_O(SRAM_DQ), .A(SRAM_ADDR), .CE(SRAM_CE_N), .UB(SRAM_UB_N), .LB(SRAM_LB_N), .OE(SRAM_OE_N), .WE(SRAM_WE_N));
 
 
 endmodule
