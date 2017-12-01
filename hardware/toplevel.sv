@@ -79,7 +79,7 @@ assign LEDG[3:0] = P1_Direction;
 keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Direction);
 
 // Instantiate GPU
-graphics_wrapper graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
+graphics_module graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
 
 
 

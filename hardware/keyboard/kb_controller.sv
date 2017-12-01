@@ -4,9 +4,9 @@ module keyboard_controller (input logic CLK_50, psClk, psData, RESET_H,
 logic[7:0] keyCode;
 logic press;
 
-always_ff @ (posedge Clk)
+always_ff @ (posedge CLK_50)
 begin
-	if (reset)
+	if (RESET_H)
 	begin
 		for (int i = 0; i < 4; i++)
 			P1_Direction[i] <= 0;
@@ -27,6 +27,6 @@ begin
 	endcase
 end
 
-keyboard kb_0(.Clk(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .reset(RESET_H), .keyCode(keyCode), .press(press));
+keyboard kb_0(.Clk(CLK_50), .psClk, .psData, .reset(RESET_H), .keyCode, .press);
 									 
 endmodule

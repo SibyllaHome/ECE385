@@ -84,42 +84,64 @@ module GPU (
 		VRAM_X = DrawX_Inc; 
 		VRAM_Y = DrawY_Inc;
 		VRAM_READ_SPRITE = 0;
-		if (VGA_CLK == 1) // VGA_CLK = 1
+		
+		// if in bound, read character on vga_CLK = 1 (first half of this frame)
+		// on second half of this frame, if what we read was not transparent, keep reading the sprite
+		if (in_p1_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
-			if (in_p1_bound)
-			begin
-				State = ReadSPRITE;
-				VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
-				VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
-				VRAM_READ_SPRITE = 1;
-			end
-			else if (in_p2_bound)
-			begin
-				State = ReadSPRITE;
-				VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
-				VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
-				VRAM_READ_SPRITE = 1;
-			end
+			State = ReadSPRITE;
+			VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
+			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+			VRAM_READ_SPRITE = 1;
 		end
-		else // VGA_CLK = 0
+		// same logic for p2, p1 takes priority over p2
+		else if (in_p2_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent))) 
 		begin
-			if (!Temp_is_Transparent)
-			begin
-				if (in_p1_bound)
-				begin
-					State = ReadSPRITE;
-					VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
-					VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
-					VRAM_READ_SPRITE = 1;
-				end
-				else if (in_p2_bound)
-				begin
-					State = ReadSPRITE;
-					VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
-					VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
-					VRAM_READ_SPRITE = 1;
-				end
-			end	
+			State = ReadSPRITE;
+			// invert how we read p2's X, since p2 will be facing p1
+			VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH; 
+			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT;
+			VRAM_READ_SPRITE = 1;
 		end
+		
+		
+//		if (VGA_CLK == 1) // VGA_CLK = 1
+//		begin
+//			if (in_p1_bound)
+//			begin
+//				State = ReadSPRITE;
+//				VRAM_X = - DrawX_Inc + p1_X + SPRITE_WIDTH; 
+//				VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+//				VRAM_READ_SPRITE = 1;
+//			end
+//			else if (in_p2_bound)
+//			begin
+//				State = ReadSPRITE;
+//				VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
+//				VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+//				VRAM_READ_SPRITE = 1;
+//			end
+//		end
+//		
+//		else // VGA_CLK = 0
+//		begin
+//			if (!Temp_is_Transparent)
+//			begin
+//				if (in_p1_bound)
+//				begin
+//					State = ReadSPRITE;
+//					VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
+//					VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+//					VRAM_READ_SPRITE = 1;
+//				end
+//				else if (in_p2_bound)
+//				begin
+//					State = ReadSPRITE;
+//					VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH; 
+//					VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+//					VRAM_READ_SPRITE = 1;
+//				end
+//			end	
+//		end
     end
 endmodule
