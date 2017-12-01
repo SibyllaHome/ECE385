@@ -6,3 +6,4 @@ simulation
 hardware/nios_system
 hardware/nios_system
 *.ini
+*.rpt
