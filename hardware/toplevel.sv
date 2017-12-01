@@ -30,9 +30,26 @@ module toplevel (
 	output logic [3:0]  DRAM_DQM,
 	output logic        DRAM_RAS_N,
 	output logic        DRAM_WE_N,
-	output logic        DRAM_CLK
-	input  logic		  PS2_KBCLK
-	input  logic		  PS2_KBDAT
+	output logic        DRAM_CLK,
+	
+	// PS2
+	input  logic		  PS2_KBCLK,
+	input  logic		  PS2_KBDAT,
+	
+	// VGA
+	output logic [7:0]  VGA_R,        //VGA Red
+							  VGA_G,        //VGA Green
+							  VGA_B,        //VGA Blue
+	output logic        VGA_CLK,      //VGA Clock
+							  VGA_SYNC_N,   //VGA Sync signal
+							  VGA_BLANK_N,  //VGA Blank signal
+							  VGA_VS,       //VGA virtical sync signal
+							  VGA_HS,       //VGA horizontal sync signal
+	
+	// SRAM passthrough
+	output logic 		  SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
+	output logic [19:0] SRAM_ADDR,
+	inout wire   [15:0] SRAM_DQ //tristate buffers need to be of type wire
 );
 
 logic[15:0] EXPORT;
@@ -57,18 +74,14 @@ nios_system system (
 assign LEDR[15:0] = EXPORT;
 
 // Instantiate Keyboard
-logic[7:0] keyCode;
-logic press;
-keyboard kb_0(.Clk(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .reset(~KEY[0]), .keyCode(keyCode), .press(press));
+logic [3:0] P1_Direction;
+assign LEDG[3:0] = P1_Direction;
+keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Direction);
 
-// Display Keycode
-HexDriver hexdrv0 (
-	.In(keyCode[3:0]),
-   .Out(HEX0)
-);
-HexDriver hexdrv1 (
-	.In(keyCode[7:4]),
-   .Out(HEX1)
-);
+// Instantiate GPU
+graphics_wrapper graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
+
+
+
 endmodule
 

@@ -34,14 +34,15 @@ module graphics_wrapper( 	input  logic        CLK_50, RESET_H,
 	logic [7:0] VRAM_RGB;
 	
 	// SPRITE Data
-	logic[9:0] SPRITE_WIDTH = 20;
-	logic[9:0] SPRITE_HEIGHT = 20;
-	logic[7:0] SPRITE_TRANSPARENT_COLOR = 8'hff;
+	// characters are 55 x 80
+	logic[9:0] SPRITE_WIDTH = 55;
+	logic[9:0] SPRITE_HEIGHT = 80;
+	logic[7:0] SPRITE_TRANSPARENT_COLOR = 8'hfc;
 	logic	[9:0] p1_X, p1_Y, p2_X, p2_Y;
-	assign p1_X = 25;
-	assign p1_Y = 10;
-	assign p2_X = 200;
-	assign p2_Y = 200;
+	assign p1_X = 300;
+	assign p1_Y = 200;
+	assign p2_X = 700;
+	assign p2_Y = 700;
    logic	[3:0] p1_animation, p2_animation;
 	assign p1_animation = 0;
 	assign p2_animation = 1;
