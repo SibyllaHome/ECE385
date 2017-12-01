@@ -4,4 +4,5 @@ incremental_db
 output_files
 simulation
 hardware/nios_system
+hardware/nios_system
 *.ini
