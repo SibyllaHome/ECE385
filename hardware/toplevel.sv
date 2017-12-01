@@ -31,23 +31,23 @@ module toplevel (
 	output logic        DRAM_RAS_N,
 	output logic        DRAM_WE_N,
 	output logic        DRAM_CLK,
-	
+
 	// PS2
-	input  logic		  PS2_KBCLK,
-	input  logic		  PS2_KBDAT,
-	
+	input  logic		PS2_KBCLK,
+	input  logic		PS2_KBDAT,
+
 	// VGA
 	output logic [7:0]  VGA_R,        //VGA Red
-							  VGA_G,        //VGA Green
-							  VGA_B,        //VGA Blue
+						VGA_G,        //VGA Green
+						VGA_B,        //VGA Blue
 	output logic        VGA_CLK,      //VGA Clock
-							  VGA_SYNC_N,   //VGA Sync signal
-							  VGA_BLANK_N,  //VGA Blank signal
-							  VGA_VS,       //VGA virtical sync signal
-							  VGA_HS,       //VGA horizontal sync signal
-	
+						VGA_SYNC_N,   //VGA Sync signal
+						VGA_BLANK_N,  //VGA Blank signal
+						VGA_VS,       //VGA virtical sync signal
+						VGA_HS,       //VGA horizontal sync signal
+
 	// SRAM passthrough
-	output logic 		  SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
+	output logic 		SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
 	output logic [19:0] SRAM_ADDR,
 	inout wire   [15:0] SRAM_DQ //tristate buffers need to be of type wire
 );
@@ -84,4 +84,3 @@ graphics_module graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
 
 
 endmodule
-
