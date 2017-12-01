@@ -11,6 +11,7 @@ logic VGA_CLK, VGA_SYNC_N, VGA_BLANK_N, VGA_VS, VGA_HS;
 logic SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N;
 logic [19:0] SRAM_ADDR;
 wire [15:0] SRAM_DQ; //tristate buffers need to be of type wire
+logic left, right;
 
 // Instantiating the cpu
 graphics_module gw(.CLK_50(Clk), .*);

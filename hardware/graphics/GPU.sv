@@ -41,10 +41,12 @@ module GPU (
 	assign VGA_G[4:0] = 0;
 	assign VGA_B[5:0] = 0;
 
+	// temporary rgb value store in the middle of each vga clock cycle
 	logic[7:0] Temp_RGB;
 	logic Temp_is_Transparent;
 	assign Temp_is_Transparent = (Temp_RGB == SPRITE_TRANSPARENT_COLOR);
-
+   assign neg_VGA_CLK = ~VGA_CLK; 
+	
 	always_ff @ (negedge VGA_CLK) // Latch Temporary RGB value mid - VGA clock
 	begin
 	Temp_RGB <= VRAM_RGB;

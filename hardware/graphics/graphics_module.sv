@@ -14,7 +14,9 @@ module graphics_module(
 				// SRAM passthrough
 				output logic 		SRAM_CE_N, SRAM_UB_N, SRAM_LB_N, SRAM_OE_N, SRAM_WE_N,
 				output logic [19:0] SRAM_ADDR,
-				inout wire [15:0] 	SRAM_DQ //tristate buffers need to be of type wire
+				inout wire [15:0] 	SRAM_DQ, //tristate buffers need to be of type wire
+				// demo
+				input logic left, right
 );
 
 	logic CLK_25 = 0;
@@ -39,14 +41,36 @@ module graphics_module(
 	logic[9:0] SPRITE_WIDTH = 106/2;
 	logic[9:0] SPRITE_HEIGHT = 160/2;
 	logic[7:0] SPRITE_TRANSPARENT_COLOR = 8'hfc;
-	logic[9:0] p1_X, p1_Y, p2_X, p2_Y;
-	assign p1_X = 200;
-	assign p1_Y = 0;
-	assign p2_X = 300;
-	assign p2_Y = 0;
+	logic[9:0] p1_X;
+	logic[9:0] p1_Y;
+	logic[9:0] p2_X;
+	logic[9:0] p2_Y;
 	logic[3:0] p1_animation, p2_animation;
 	assign p1_animation = 0;
 	assign p2_animation = 1;
+	
+	// DEMO
+	always_ff @ (posedge VGA_VS)
+	begin
+		if (RESET_H)
+		begin
+			p1_X <= 200;
+			p1_Y <= 400;
+		end
+		if (left)
+			p1_X <= p1_X - 5;
+		else if (right) 
+			p1_X <= p1_X + 5;
+	end
+	
+	logic[9:0] p1_X_n;
+	always_comb
+	begin
+		if (left)
+		p1_X_n <= p1_X - 5;
+		else if (right) 
+		p1_X_n <= p1_X + 5;
+	end
 
 	GPU gpu_instance(.*);
 

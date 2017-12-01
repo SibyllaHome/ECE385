@@ -40,7 +40,7 @@ module toplevel (
 	output logic [7:0]  VGA_R,        //VGA Red
 						VGA_G,        //VGA Green
 						VGA_B,        //VGA Blue
-	output logic        VGA_CLK,      //VGA Clock
+	output logic   VGA_CLK,      //VGA Clock
 						VGA_SYNC_N,   //VGA Sync signal
 						VGA_BLANK_N,  //VGA Blank signal
 						VGA_VS,       //VGA virtical sync signal
@@ -77,6 +77,30 @@ assign LEDR[15:0] = EXPORT;
 logic [3:0] P1_Direction;
 assign LEDG[3:0] = P1_Direction;
 keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Direction);
+
+// demo player movement
+logic right, left;
+always_ff @ (posedge VGA_VS)
+begin
+	
+	if (P1_Direction == 4'b0010)
+	begin
+	left <= 1;
+	right <= 0;
+	end
+	
+	else if (P1_Direction == 4'b0100) 
+	begin
+	right <= 1;
+	left <= 0;
+	end
+	
+	else
+	begin
+	right <= 0;
+	left <= 0;
+	end
+end
 
 // Instantiate GPU
 graphics_module graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
