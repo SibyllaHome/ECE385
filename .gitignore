@@ -8,3 +8,9 @@ hardware/nios_system
 *.ini
 *.rpt
 *.sopcinfo
+software/street_fighter_bsp
+software/street_fighter/obj
+software/street_fighter/street_fighter.elf
+software/street_fighter/street_fighter.map
+software/street_fighter/street_fighter.objdump
+software/workspace

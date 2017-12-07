@@ -21,7 +21,7 @@ module GPU (
 					input	logic	[9:0] DrawX, DrawY,
 					// Data from CPU
 					input	logic	[9:0] p1_X, p1_Y, p2_X, p2_Y,
-					input	logic	[3:0] p1_animation, p2_animation,
+					input	logic	[9:0] p1_animation, p2_animation,
 					// VRAM Control signals
 					output	logic VRAM_READ_SPRITE,
 					output	logic[9:0] VRAM_X, VRAM_Y,

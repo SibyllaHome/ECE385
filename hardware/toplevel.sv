@@ -52,13 +52,19 @@ module toplevel (
 	inout wire   [15:0] SRAM_DQ //tristate buffers need to be of type wire
 );
 
-logic[15:0] EXPORT;
+logic [15:0] EXPORT;
+logic [9:0]	 p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation;
+assign LEDR[15:0] = EXPORT;
+assign LEDR[17] = ~VGA_VS;
+// Instantiate Keyboard
+logic [3:0] P1_Keycode, P2_Keycode;
+assign LEDG[3:0] = P1_Keycode;
+keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Keycode);
 
 // Instantiation of Qsys design
 nios_system system (
 	.clk_clk(CLOCK_50),								// Clock input
 	.reset_reset_n(1'b1),							// Reset key
-	.pio_out_export(EXPORT),	// Exported data
 	.sdram_wire_addr(DRAM_ADDR),					// sdram_wire.addr
 	.sdram_wire_ba(DRAM_BA),						// sdram_wire.ba
 	.sdram_wire_cas_n(DRAM_CAS_N),				// sdram_wire.cas_n
@@ -68,39 +74,25 @@ nios_system system (
 	.sdram_wire_dqm(DRAM_DQM),						// sdram.dqm
 	.sdram_wire_ras_n(DRAM_RAS_N),				// sdram.ras_n
 	.sdram_wire_we_n(DRAM_WE_N),					// sdram.we_n
-	.sdram_clk_clk(DRAM_CLK)						// Clock out to SDRAM
+	.sdram_clk_clk(DRAM_CLK),						// Clock out to SDRAM
+	
+	.export_VGA_VS(~VGA_VS),       				//     export.VGA_VS
+	.export_P1_Keycode(P1_Keycode),   			//     export.P1_Keycode
+	.export_P2_Keycode(P2_Keycode),  			//           .P2_Keycode
+	.export_p1_x(p1_X),         					//           .p1_x
+	.export_p1_y(p1_Y),         					//           .p1_y
+	.export_p1_width(p1_width),     				//           .p1_width
+	.export_p1_height(p1_height),    			//           .p1_height
+	.export_p1_health(p1_health),    			//           .p1_health
+	.export_p1_animation(p1_animation), 		//           .p1_animation
+	.export_p2_x(p2_X),         					//           .p2_x
+	.export_p2_y(p2_Y),         					//           .p2_y
+	.export_p2_width(p2_width),     				//           .p2_width
+	.export_p2_height(p2_height),    			//           .p2_height
+	.export_p2_health(),    						//           .p2_health
+	.export_p2_animation(p2_animation), 		//           .p2_animation
+	.pio_out_export(EXPORT)						// PIO
 );
-
-assign LEDR[15:0] = EXPORT;
-
-// Instantiate Keyboard
-logic [3:0] P1_Direction;
-assign LEDG[3:0] = P1_Direction;
-keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Direction);
-
-// demo player movement
-logic right, left;
-always_ff @ (posedge VGA_VS)
-begin
-	
-	if (P1_Direction == 4'b0010)
-	begin
-	left <= 1;
-	right <= 0;
-	end
-	
-	else if (P1_Direction == 4'b0100) 
-	begin
-	right <= 1;
-	left <= 0;
-	end
-	
-	else
-	begin
-	right <= 0;
-	left <= 0;
-	end
-end
 
 // Instantiate GPU
 graphics_module graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
