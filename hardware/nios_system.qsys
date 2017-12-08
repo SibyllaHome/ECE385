@@ -33,6 +33,38 @@
          type = "String";
       }
    }
+   element LED_PIO
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element LED_PIO.s1
+   {
+      datum baseAddress
+      {
+         value = "144";
+         type = "String";
+      }
+   }
+   element VGA_VS_PIO
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element VGA_VS_PIO.s1
+   {
+      datum baseAddress
+      {
+         value = "160";
+         type = "String";
+      }
+   }
    element clk_0
    {
       datum _sortIndex
@@ -53,7 +85,7 @@
    {
       datum baseAddress
       {
-         value = "176";
+         value = "192";
          type = "String";
       }
    }
@@ -63,11 +95,6 @@
       {
          value = "1";
          type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
-         type = "boolean";
       }
    }
    element nios2_gen2_0.debug_mem_slave
@@ -131,22 +158,6 @@
          type = "String";
       }
    }
-   element pio_0
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-   }
-   element pio_0.s1
-   {
-      datum baseAddress
-      {
-         value = "128";
-         type = "String";
-      }
-   }
    element sdram
    {
       datum _sortIndex
@@ -183,7 +194,7 @@
    {
       datum baseAddress
       {
-         value = "144";
+         value = "128";
          type = "String";
       }
    }
@@ -199,7 +210,7 @@
    {
       datum baseAddress
       {
-         value = "168";
+         value = "184";
          type = "String";
       }
    }
@@ -263,18 +274,51 @@
    type="conduit"
    dir="end" />
  <interface
-   name="pio_out"
-   internal="pio_0.external_connection"
+   name="led_pio_out"
+   internal="LED_PIO.external_connection"
    type="conduit"
    dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
  <interface name="sdram_clk" internal="sdram_pll.c1" type="clock" dir="start" />
  <interface name="sdram_wire" internal="sdram.wire" type="conduit" dir="end" />
+ <interface
+   name="vga_vs_pio_in"
+   internal="VGA_VS_PIO.external_connection"
+   type="conduit"
+   dir="end" />
  <module
    name="Game_Interface_Core_0"
    kind="Game_Interface_Core"
    version="1.0"
    enabled="1" />
+ <module name="LED_PIO" kind="altera_avalon_pio" version="15.0" enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="16" />
+ </module>
+ <module name="VGA_VS_PIO" kind="altera_avalon_pio" version="15.0" enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="1" />
+ </module>
  <module name="clk_0" kind="clock_source" version="15.0" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -324,7 +368,7 @@
   <parameter name="dataAddrWidth" value="29" />
   <parameter name="dataMasterHighPerformanceAddrWidth" value="1" />
   <parameter name="dataMasterHighPerformanceMapParam" value="" />
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x0' end='0x10' /><slave name='timer_0.s1' start='0x20' end='0x40' /><slave name='Game_Interface_Core_0.SLAVE' start='0x40' end='0x80' /><slave name='pio_0.s1' start='0x80' end='0x90' /><slave name='sdram_pll.pll_slave' start='0x90' end='0xA0' /><slave name='sysid_qsys_0.control_slave' start='0xA8' end='0xB0' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0xB0' end='0xB8' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x1000' end='0x1800' /><slave name='sdram.s1' start='0x10000000' end='0x18000000' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x0' end='0x10' /><slave name='timer_0.s1' start='0x20' end='0x40' /><slave name='Game_Interface_Core_0.SLAVE' start='0x40' end='0x80' /><slave name='sdram_pll.pll_slave' start='0x80' end='0x90' /><slave name='LED_PIO.s1' start='0x90' end='0xA0' /><slave name='VGA_VS_PIO.s1' start='0xA0' end='0xB0' /><slave name='sysid_qsys_0.control_slave' start='0xB8' end='0xC0' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0xC0' end='0xC8' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x1000' end='0x1800' /><slave name='sdram.s1' start='0x10000000' end='0x18000000' /></address-map>]]></parameter>
   <parameter name="data_master_high_performance_paddr_base" value="0" />
   <parameter name="data_master_high_performance_paddr_size" value="0" />
   <parameter name="data_master_paddr_base" value="0" />
@@ -361,16 +405,16 @@
   <parameter name="icache_ramBlockType" value="Automatic" />
   <parameter name="icache_size" value="4096" />
   <parameter name="icache_tagramBlockType" value="Automatic" />
-  <parameter name="impl" value="Fast" />
+  <parameter name="impl" value="Tiny" />
   <parameter name="instAddrWidth" value="29" />
-  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x0' end='0x10' /><slave name='sdram_pll.pll_slave' start='0x90' end='0xA0' /><slave name='sysid_qsys_0.control_slave' start='0xA8' end='0xB0' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x1000' end='0x1800' /><slave name='sdram.s1' start='0x10000000' end='0x18000000' /></address-map>]]></parameter>
+  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x0' end='0x10' /><slave name='sdram_pll.pll_slave' start='0x80' end='0x90' /><slave name='sysid_qsys_0.control_slave' start='0xB8' end='0xC0' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x1000' end='0x1800' /><slave name='sdram.s1' start='0x10000000' end='0x18000000' /></address-map>]]></parameter>
   <parameter name="instructionMasterHighPerformanceAddrWidth" value="1" />
   <parameter name="instructionMasterHighPerformanceMapParam" value="" />
   <parameter name="instruction_master_high_performance_paddr_base" value="0" />
   <parameter name="instruction_master_high_performance_paddr_size" value="0" />
   <parameter name="instruction_master_paddr_base" value="0" />
   <parameter name="instruction_master_paddr_size" value="0" />
-  <parameter name="internalIrqMaskSystemInfo" value="34" />
+  <parameter name="internalIrqMaskSystemInfo" value="3" />
   <parameter name="io_regionbase" value="0" />
   <parameter name="io_regionsize" value="0" />
   <parameter name="master_addr_map" value="false" />
@@ -486,7 +530,7 @@
    version="15.0"
    enabled="1">
   <parameter name="allowInSystemMemoryContentEditor" value="false" />
-  <parameter name="autoInitializationFileName">nios_system_onchip_memory2_0</parameter>
+  <parameter name="autoInitializationFileName">$${FILENAME}_onchip_memory2_0</parameter>
   <parameter name="blockType" value="AUTO" />
   <parameter name="copyInitFile" value="false" />
   <parameter name="dataWidth" value="32" />
@@ -509,20 +553,6 @@
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
  </module>
- <module name="pio_0" kind="altera_avalon_pio" version="15.0" enabled="1">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="clockRate" value="50000000" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="16" />
- </module>
  <module
    name="sdram"
    kind="altera_avalon_new_sdram_controller"
@@ -537,7 +567,7 @@
   <parameter name="casLatency" value="3" />
   <parameter name="clockRate" value="50000000" />
   <parameter name="columnWidth" value="10" />
-  <parameter name="componentName" value="nios_system_sdram" />
+  <parameter name="componentName" value="$${FILENAME}_sdram" />
   <parameter name="dataWidth" value="32" />
   <parameter name="generateSimulationModel" value="false" />
   <parameter name="initNOPDelay" value="0.0" />
@@ -754,7 +784,7 @@
    start="nios2_gen2_0.data_master"
    end="jtag_uart_0.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00b0" />
+  <parameter name="baseAddress" value="0x00c0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -763,7 +793,7 @@
    start="nios2_gen2_0.data_master"
    end="sysid_qsys_0.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00a8" />
+  <parameter name="baseAddress" value="0x00b8" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -781,25 +811,25 @@
    start="nios2_gen2_0.data_master"
    end="sdram_pll.pll_slave">
   <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="nios2_gen2_0.data_master"
+   end="VGA_VS_PIO.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="nios2_gen2_0.data_master"
+   end="LED_PIO.s1">
+  <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0090" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="nios2_gen2_0.data_master"
-   end="onchip_memory2_0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="nios2_gen2_0.data_master"
-   end="sdram.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -815,9 +845,18 @@
    kind="avalon"
    version="15.0"
    start="nios2_gen2_0.data_master"
-   end="pio_0.s1">
+   end="sdram.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0080" />
+  <parameter name="baseAddress" value="0x10000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="nios2_gen2_0.data_master"
+   end="onchip_memory2_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -826,7 +865,7 @@
    start="nios2_gen2_0.instruction_master"
    end="sysid_qsys_0.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00a8" />
+  <parameter name="baseAddress" value="0x00b8" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -844,16 +883,7 @@
    start="nios2_gen2_0.instruction_master"
    end="sdram_pll.pll_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0090" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="nios2_gen2_0.instruction_master"
-   end="onchip_memory2_0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x0080" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -865,6 +895,15 @@
   <parameter name="baseAddress" value="0x10000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="nios2_gen2_0.instruction_master"
+   end="onchip_memory2_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <connection kind="clock" version="15.0" start="sdram_pll.c0" end="sdram.clk" />
  <connection
    kind="clock"
@@ -874,8 +913,9 @@
  <connection kind="clock" version="15.0" start="clk_0.clk" end="sysid_qsys_0.clk" />
  <connection kind="clock" version="15.0" start="clk_0.clk" end="timer_0.clk" />
  <connection kind="clock" version="15.0" start="clk_0.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="15.0" start="clk_0.clk" end="LED_PIO.clk" />
+ <connection kind="clock" version="15.0" start="clk_0.clk" end="VGA_VS_PIO.clk" />
  <connection kind="clock" version="15.0" start="clk_0.clk" end="nios2_gen2_0.clk" />
- <connection kind="clock" version="15.0" start="clk_0.clk" end="pio_0.clk" />
  <connection
    kind="clock"
    version="15.0"
@@ -890,14 +930,14 @@
    kind="interrupt"
    version="15.0"
    start="nios2_gen2_0.irq"
-   end="jtag_uart_0.irq">
-  <parameter name="irqNumber" value="5" />
+   end="timer_0.irq">
+  <parameter name="irqNumber" value="0" />
  </connection>
  <connection
    kind="interrupt"
    version="15.0"
    start="nios2_gen2_0.irq"
-   end="timer_0.irq">
+   end="jtag_uart_0.irq">
   <parameter name="irqNumber" value="1" />
  </connection>
  <connection
@@ -930,8 +970,17 @@
    kind="reset"
    version="15.0"
    start="clk_0.clk_reset"
+   end="LED_PIO.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="clk_0.clk_reset"
+   end="VGA_VS_PIO.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="clk_0.clk_reset"
    end="nios2_gen2_0.reset" />
- <connection kind="reset" version="15.0" start="clk_0.clk_reset" end="pio_0.reset" />
  <connection
    kind="reset"
    version="15.0"

@@ -8,8 +8,9 @@
 #define screenWidth 640
 #define screenHeight 480
 
-volatile unsigned int * VGA_VS = (volatile unsigned int *) 0x00000040;
-volatile unsigned int * PIO = (volatile unsigned int *) 0x00000080;
+volatile unsigned int * VGA_VS_PIO = (volatile unsigned int *) 0x000000a0;
+volatile unsigned int * LED_PIO = (volatile unsigned int *) 0x00000090;
+volatile unsigned int * GAME_INTERFACE = (volatile unsigned int *) 0x00000040;
 
 enum mvt_state {Standing, Move_Left, Move_Right, Jump_Up, Jump_Left, Jump_Right, Landing};
 enum act_state {None, Punching, Blocking, Taking_Damage};
@@ -90,22 +91,24 @@ void updateMovement(Player_Software * player, Player_Hardware * hardware) {
     }
 }
 void performMovement(Player_Software * player, Player_Hardware * hardware) {
-    if ((player->movement_state == Move_Right) || (player->movement_state == Jump_Right) && (hardware->animation != 5)) {
-        if (player->x + 5 < screenWidth - player_sizeX) player->x += 5;
-    }
-    else if ((player->movement_state == Move_Left) || (player->movement_state == Jump_Left) && (hardware->animation != 5)) {
-        if (player->x + 5 > player_sizeX) player->x -= 5;
-    }
-    else if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Left) || (player->movement_state == Jump_Right) && (hardware->animation != 5)) {
-        player->y -= player->animation_cycle - 15;
-    }
+	if (hardware->animation != 5) { // don't move while landing
+		if ((player->movement_state == Move_Right) || (player->movement_state == Jump_Right)) {
+			if (player->x + 5 < screenWidth - player_sizeX) player->x += 5;
+		}
+		else if ((player->movement_state == Move_Left) || (player->movement_state == Jump_Left)) {
+			if (player->x + 5 > player_sizeX) player->x -= 5;
+		}
+		else if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Left) || (player->movement_state == Jump_Right)) {
+			player->y -= player->animation_cycle - 15;
+		}
+	}
 }
 void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware) {
     // set x and y
     hardware->x = player->x;
     hardware->y = player->y;
 
-    // set different animations if movement didnt change
+    // set different animations if movement didn't change
     if (player->last_movement_state == player->movement_state) {
         if (player->animation_cycle == 30) { // set a new animation every .5 seconds
             if (player->movement_state == Standing) {
@@ -141,18 +144,17 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
 int main() {
 //    Player_Software p1s(100);
 //    Player_Hardware * p1h = (Player_Hardware *) 0x131231; // change
+	int frame_synchronizer = 1;
+	int v_counter = 0;
     while (1) {
-    	int v_counter = 0;
-    	int test = 5;
-    	*PIO = test;
-    	printf("%d\n", *VGA_VS);
-        while (*VGA_VS == 0) {
-        	v_counter++;
-        	usleep(5);
-        } // wait for a new frame from hardware
-		printf("%d+\n", v_counter);
-//			updateMovement(&p1s, p1h);
-//			performMovement(&p1s, p1h);
-//			drawMovementAnimation(&p1s, p1h);
+    	if (frame_synchronizer != *VGA_VS_PIO) {
+    		v_counter++;
+    	}
+    	else {
+    		printf("f_sync: %d\n", frame_synchronizer);
+    		printf("vc: %d\n", v_counter);
+    		frame_synchronizer = !frame_synchronizer;
+    		v_counter = 0;
+    	}
     }
 }

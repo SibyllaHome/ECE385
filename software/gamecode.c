@@ -8,8 +8,9 @@
 #define screenWidth 640
 #define screenHeight 480
 
-volatile unsigned int * VGA_VS = (volatile unsigned int *) 0x00000040;
-volatile unsigned int * PIO = (volatile unsigned int *) 0x00000080;
+volatile unsigned int * VGA_VS_PIO = (volatile unsigned int *) 0x000000a0;
+volatile unsigned int * LED_PIO = (volatile unsigned int *) 0x00000090;
+volatile unsigned int * GAME_INTERFACE = (volatile unsigned int *) 0x00000040;
 
 enum mvt_state {Standing, Move_Left, Move_Right, Jump_Up, Jump_Left, Jump_Right, Landing};
 enum act_state {None, Punching, Blocking, Taking_Damage};
@@ -141,18 +142,15 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
 int main() {
 //    Player_Software p1s(100);
 //    Player_Hardware * p1h = (Player_Hardware *) 0x131231; // change
+	int frame_synchronizer = 1;
+	int v_counter;
     while (1) {
-    	int v_counter = 0;
-    	int test = 5;
-    	*PIO = test;
-    	printf("%d\n", *VGA_VS);
-        while (*VGA_VS == 0) {
-        	v_counter++;
-        	usleep(5);
-        } // wait for a new frame from hardware
-		printf("%d+\n", v_counter);
-//			updateMovement(&p1s, p1h);
-//			performMovement(&p1s, p1h);
-//			drawMovementAnimation(&p1s, p1h);
+    	if (frame_synchronizer != *VGA_VS_PIO) {
+    		v_counter++;
+    	}
+    	else {
+    		frame_synchronizer = !frame_synchronizer;
+    		printf("vc: %d\n", v_counter);
+    	}
     }
 }

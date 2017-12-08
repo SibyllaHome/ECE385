@@ -53,13 +53,23 @@ module toplevel (
 );
 
 logic [15:0] EXPORT;
-logic [9:0]	 p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation;
 assign LEDR[15:0] = EXPORT;
-assign LEDR[17] = ~VGA_VS;
+
 // Instantiate Keyboard
 logic [3:0] P1_Keycode, P2_Keycode;
 assign LEDG[3:0] = P1_Keycode;
 keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Keycode);
+
+// synchronize software and hardware, such that software does 1 cycle per frame
+logic frame_synchronizer = 0;
+always_ff @ (posedge VGA_VS)
+begin
+	frame_synchronizer <= ~frame_synchronizer;
+end
+assign LEDR[17] = frame_synchronizer;
+
+// Wires to connect nios system with gpu
+logic [9:0]	 p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation;
 
 // Instantiation of Qsys design
 nios_system system (
@@ -91,7 +101,8 @@ nios_system system (
 	.export_p2_height(p2_height),    			//           .p2_height
 	.export_p2_health(),    						//           .p2_health
 	.export_p2_animation(p2_animation), 		//           .p2_animation
-	.pio_out_export(EXPORT)						// PIO
+	.led_pio_out_export(EXPORT),					// PIO
+	.vga_vs_pio_in_export(even_odd_frame)
 );
 
 // Instantiate GPU
