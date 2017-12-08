@@ -52,8 +52,8 @@ module toplevel (
 	inout wire   [15:0] SRAM_DQ //tristate buffers need to be of type wire
 );
 
-logic [15:0] EXPORT;
-assign LEDR[15:0] = EXPORT;
+logic [31:0] led_export;
+assign LEDR[15:0] = led_export[15:0];
 
 // Instantiate Keyboard
 logic [3:0] P1_Keycode, P2_Keycode;
@@ -101,8 +101,8 @@ nios_system system (
 	.export_p2_height(p2_height),    			//           .p2_height
 	.export_p2_health(),    						//           .p2_health
 	.export_p2_animation(p2_animation), 		//           .p2_animation
-	.led_pio_out_export(EXPORT),					// PIO
-	.vga_vs_pio_in_export(even_odd_frame)
+	.led_pio_out_export(led_export),					// PIO
+	.vga_vs_pio_in_export(frame_synchronizer)
 );
 
 // Instantiate GPU

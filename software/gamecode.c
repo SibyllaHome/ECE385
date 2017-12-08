@@ -3,8 +3,8 @@
 #include <math.h>
 #include <unistd.h>
 
-#define player_sizeX 106/2
-#define player_sizeY 160/2
+#define player_sizeX 104/2
+#define player_sizeY 158/2
 #define screenWidth 640
 #define screenHeight 480
 
@@ -64,17 +64,22 @@ typedef struct Player_Hardware {
     **/
 } Player_Hardware;
 
-void setDefaultHW(unsigned width, unsigned height, Player_Hardware * hardware) {
+void setDefaultHW(int x, Player_Hardware * hardware) {
+	hardware->x = x;
+	hardware->y = 400;
 	hardware->width = 106/2;
 	hardware->height = 160/2;
 	hardware->health = 100;
-	hardware->animation = 0;
+	hardware->animation = 1;
 }
 
 void updateMovement(Player_Software * player, Player_Hardware * hardware) {
     if (player->movement_state == Standing || player->movement_state == Move_Left || player->movement_state == Move_Right) { // only allow new movements when on the ground
-        if(hardware->keycode == 8) { // only D being pressed
-            player->movement_state = Move_Left;
+    	if(hardware->keycode == 0) { // none being pressed
+    		player->movement_state = Standing;
+    	}
+    	if(hardware->keycode == 8) { // only D being pressed
+            player->movement_state = Move_Right;
         }
         else if(hardware->keycode == 2) { // only A being pressed
             player->movement_state = Move_Left;
@@ -91,22 +96,24 @@ void updateMovement(Player_Software * player, Player_Hardware * hardware) {
     }
 }
 void performMovement(Player_Software * player, Player_Hardware * hardware) {
-    if ((player->movement_state == Move_Right) || (player->movement_state == Jump_Right) && (hardware->animation != 5)) {
-        if (player->x + 5 < screenWidth - player_sizeX) player->x += 5;
-    }
-    else if ((player->movement_state == Move_Left) || (player->movement_state == Jump_Left) && (hardware->animation != 5)) {
-        if (player->x + 5 > player_sizeX) player->x -= 5;
-    }
-    else if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Left) || (player->movement_state == Jump_Right) && (hardware->animation != 5)) {
-        player->y -= player->animation_cycle - 15;
-    }
+	if (hardware->animation != 5) { // don't move while landing
+		if ((player->movement_state == Move_Right) || (player->movement_state == Jump_Right)) {
+			if (player->x + 5 < screenWidth - player_sizeX) player->x += 5;
+		}
+		else if ((player->movement_state == Move_Left) || (player->movement_state == Jump_Left)) {
+			if (player->x + 5 > player_sizeX) player->x -= 5;
+		}
+		if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Left) || (player->movement_state == Jump_Right)) {
+			if (player->y + player->animation_cycle - 15 <= 400) player->y += player->animation_cycle - 15;
+		}
+		// set x and y
+		hardware->x = player->x;
+		hardware->y = player->y;
+	}
 }
 void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware) {
-    // set x and y
-    hardware->x = player->x;
-    hardware->y = player->y;
 
-    // set different animations if movement didnt change
+    // set different animations if movement didn't change
     if (player->last_movement_state == player->movement_state) {
         if (player->animation_cycle == 30) { // set a new animation every .5 seconds
             if (player->movement_state == Standing) {
@@ -120,12 +127,10 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
             if (player->movement_state == Jump_Up || player->movement_state == Jump_Right || player->movement_state == Jump_Left) {
                 if (hardware->animation == 3) hardware->animation = 4; // change from going up to going down
                 if (hardware->animation == 4) hardware->animation = 5; // perform landing
+                if (hardware->animation == 5) {
+                	player->movement_state = Standing;
+                }
             }
-            player->animation_cycle = 0; // reset animation counter at end of .5 seconds
-        }
-        else if (player->animation_cycle == 10 && hardware->animation == 5) { // reset from landing to standing after .2 seconds
-            player->movement_state = Standing;
-            hardware->animation = 0;
             player->animation_cycle = 0; // reset animation counter at end of .5 seconds
         }
         else player->animation_cycle++;
@@ -135,22 +140,37 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
         if (player->movement_state == Move_Right || player->movement_state == Move_Left) hardware->animation = 1;
         if (player->movement_state == Jump_Up || player->movement_state == Jump_Left || player->movement_state == Jump_Right) hardware->animation = 3;
         player->last_movement_state = player->movement_state;
+        player->animation_cycle = 0; // reset animation counter at start of different movement
     }
 }
 
 
 int main() {
-//    Player_Software p1s(100);
-//    Player_Hardware * p1h = (Player_Hardware *) 0x131231; // change
+	// initialize players
+    Player_Software p1s;
+    setDefaultSW(100, &p1s);
+    Player_Hardware * p1h = (Player_Hardware *) GAME_INTERFACE; // change
+    setDefaultHW(100, p1h);
+
+    Player_Software p2s;
+    setDefaultSW(400, &p2s);
+    Player_Hardware * p2h = (Player_Hardware *) &GAME_INTERFACE[7]; // change
+    setDefaultHW(400, p2h);
+
 	int frame_synchronizer = 1;
-	int v_counter;
+	int vc = 0;
     while (1) {
-    	if (frame_synchronizer != *VGA_VS_PIO) {
-    		v_counter++;
-    	}
+    	if (frame_synchronizer != *VGA_VS_PIO) {vc++;}
     	else {
+    		printf("%d\n",vc);
+    		vc = 0;
+    		updateMovement(&p1s,p1h);
+    		drawMovementAnimation(&p1s,p1h);
+    		performMovement(&p1s,p1h);
+    		updateMovement(&p2s,p2h);
+    		drawMovementAnimation(&p2s,p2h);
+    		performMovement(&p2s,p2h);
     		frame_synchronizer = !frame_synchronizer;
-    		printf("vc: %d\n", v_counter);
     	}
     }
 }

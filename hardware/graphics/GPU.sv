@@ -79,7 +79,12 @@ module GPU (
 	assign in_p1_bound = (p1_X < DrawX_Inc + SPRITE_WIDTH && DrawX_Inc < p1_X + SPRITE_WIDTH && p1_Y < DrawY_Inc + SPRITE_HEIGHT && DrawY_Inc < p1_Y + SPRITE_HEIGHT);
 	assign in_p2_bound = (p2_X < DrawX_Inc + SPRITE_WIDTH && DrawX_Inc < p2_X + SPRITE_WIDTH && p2_Y < DrawY_Inc + SPRITE_HEIGHT && DrawY_Inc < p2_Y + SPRITE_HEIGHT);
 
-    // VRAM Control logic
+   // animation offset
+	logic [9:0] animation, anim_offset_x, anim_offset_y;
+	assign animation = (in_p2_bound && !in_p1_bound) ? p2_animation : p1_animation;
+	animation_offset offset0(.animation(animation), .offsetX(anim_offset_x), .offsetY(anim_offset_y));
+	
+	// VRAM Control logic
 	always_comb
 	begin
 		State = ReadBG;
@@ -92,8 +97,8 @@ module GPU (
 		if (in_p1_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
 			State = ReadSPRITE;
-			VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH;
-			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT;
+			VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH + anim_offset_x;
+			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT + anim_offset_y;
 			VRAM_READ_SPRITE = 1;
 		end
 		// same logic for p2, p1 takes priority over p2
@@ -101,8 +106,8 @@ module GPU (
 		begin
 			State = ReadSPRITE;
 			// invert how we read p2's X, since p2 will be facing p1
-			VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH;
-			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT;
+			VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_x;
+			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT + anim_offset_y;
 			VRAM_READ_SPRITE = 1;
 		end
 	end
