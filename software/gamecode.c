@@ -13,15 +13,16 @@ volatile unsigned int * LED_PIO = (volatile unsigned int *) 0x00000090;
 volatile unsigned int * GAME_INTERFACE = (volatile unsigned int *) 0x00000040;
 
 enum mvt_state {Standing, Move_Left, Move_Right, Jump_Up, Jump_Left, Jump_Right, Landing};
-enum act_state {None, Punching, Blocking, Taking_Damage};
+enum act_state {None, Punching, Punching_Wait, Blocking, Taking_Damage}; // punching needs to be depressed, hence punching_wait as extra state
 
 typedef struct Player_Software {
     unsigned int x;
     unsigned int y;
-    unsigned int health;
+    int health;
     enum mvt_state last_movement_state, movement_state;
     enum act_state last_action_state, action_state;
     unsigned int animation_cycle;
+    unsigned int action_cycle;
 } Player_Software;
 
 void setDefaultSW(int x, Player_Software * player) {
@@ -31,6 +32,7 @@ void setDefaultSW(int x, Player_Software * player) {
 	player->last_movement_state = player->movement_state = Standing;
 	player->last_action_state = player->action_state = None;
 	player->animation_cycle = 0;
+    player->action_cycle = 0;
 }
 
 typedef struct Player_Hardware {
@@ -144,6 +146,60 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
     }
 }
 
+void updateActions(Player_Software * player, Player_Hardware * hardware) {
+    if (player->action_state != Taking_Damage && player->action_state != Punching) { // lock player out from doing actions when taking_damage or mid punch
+        if (hardware->keycode >> 6 == 0) { // release of button resets action state
+            player->action_state = None;
+        }
+        else if (hardware->keycode >> 6 == 1) { // only block button was pressed
+            player->action_state = Blocking;
+        }
+        else if (hardware->keycode >> 6 == 2) { // only punch button was pressed
+            player->action_state = Punching;
+        }
+    }
+}
+
+void performActions(Player_Software * player_1, Player_Hardware * hardware_1, Player_Software * player_2, Player_Hardware * hardware_2) {
+    if (player_1->action_state == Punching) {
+        if (player_1->action_cycle == 5) { // perform damage in 5th action cycle
+            if (abs(player_1->x - player_2->x) < player_sizeX && abs(player_1->y - player_2->y) < player_sizeY) { // player's are in bound of each other, will do damage to other player
+                player_2->health = (player_2->action_state == Blocking) ? player_2->health - 5 : player_2->health - 10; // if player 2 was blocking, less damage recieved
+                player_2->action_state = Taking_Damage;
+            }
+            player_1->action_cycle++;
+        }
+        else if (player_1->action_cycle == 15) {
+            player_1->action_state = Punching_Wait;
+            player_1->action_cycle = 0;
+        }
+        else {player_1->action_cycle++;}
+    }
+    else if (player_1->action_state == Taking_Damage) { // recover after 5 cycles
+        if (player_1->action_cycle == 5) {
+            player_1->action_state = None;
+            player_1->action_state = 0;
+        }
+        else { player_1->action_state++; }
+    }
+}
+
+void drawActionAnimation(Player_Software * player, Player_Hardware * hardware) {
+    // set health
+    hardware->health = player->health;
+
+    // set animation for action
+    if (player->action_state == Punching || player->action_state == Punching_Wait) {
+        hardware->animation = 6;
+    }
+    else if (player->action_state == Blocking) {
+        hardware->animation = 7;
+    }
+    else if (player->action_state == Taking_Damage) {
+        hardware->animation = 8;
+    }
+}
+
 
 int main() {
 	// initialize players
@@ -164,12 +220,16 @@ int main() {
     	else {
     		printf("%d\n",vc);
     		vc = 0;
-    		updateMovement(&p1s,p1h);
-    		drawMovementAnimation(&p1s,p1h);
-    		performMovement(&p1s,p1h);
-    		updateMovement(&p2s,p2h);
-    		drawMovementAnimation(&p2s,p2h);
-    		performMovement(&p2s,p2h);
+
+    		updateMovement(&p1s,p1h); updateMovement(&p2s,p2h);
+            performMovement(&p1s,p1h); performMovement(&p2s,p2h);
+    		drawMovementAnimation(&p1s,p1h); drawMovementAnimation(&p2s,p2h);
+
+            updateActions(&p1s, p1h); updateActions(&p2s, p2h);
+            if (rand()%2) { performActions(&p1s,p1h,&p2s,p2h); performActions(&p2s,p2h,&p1s,p1h); }  // randomize who will win keep press speed battle
+            else { performActions(&p2s,p2h,&p1s,p1h); performActions(&p1s,p1h,&p2s,p2h); }
+            drawActionAnimation(&p1s, p1h); drawActionAnimation(&p2s, p2h)
+
     		frame_synchronizer = !frame_synchronizer;
     	}
     }
