@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios_system" kind="nios_system" version="1.0" fabric="QSYS">
  <!-- Format version 15.0 145 (Future versions may contain additional information.) -->
- <!-- 2017.12.08.16:20:53 -->
+ <!-- 2017.12.11.19:37:14 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1512771653</value>
+  <value>1513042633</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -648,13 +648,13 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>P1_Keycode</name>
     <direction>Input</direction>
-    <width>4</width>
+    <width>8</width>
     <role>P1_Keycode</role>
    </port>
    <port>
     <name>P2_Keycode</name>
     <direction>Input</direction>
-    <width>4</width>
+    <width>8</width>
     <role>P2_Keycode</role>
    </port>
    <port>
@@ -668,6 +668,12 @@ parameters are a RESULT of the module parameters. -->
     <direction>Output</direction>
     <width>10</width>
     <role>p1_y</role>
+   </port>
+   <port>
+    <name>p1_direction</name>
+    <direction>Output</direction>
+    <width>1</width>
+    <role>p1_direction</role>
    </port>
    <port>
     <name>p1_width</name>
@@ -704,6 +710,12 @@ parameters are a RESULT of the module parameters. -->
     <direction>Output</direction>
     <width>10</width>
     <role>p2_y</role>
+   </port>
+   <port>
+    <name>p2_direction</name>
+    <direction>Output</direction>
+    <width>1</width>
+    <role>p2_direction</role>
    </port>
    <port>
     <name>p2_width</name>
@@ -10515,7 +10527,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1512771653</value>
+   <value>1513042633</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -10535,7 +10547,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1512771653</value>
+   <value>1513042633</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -10551,7 +10563,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1512771653</value>
+   <value>1513042633</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>

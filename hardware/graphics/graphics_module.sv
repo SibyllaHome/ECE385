@@ -17,7 +17,8 @@ module graphics_module(
 				output logic [19:0] 	SRAM_ADDR,
 				inout wire   [15:0] 	SRAM_DQ, //tristate buffers need to be of type wire
 				// Player Data
-				input logic  [9:0]	p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation
+				input logic  [9:0]	p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation,
+				input logic p1_direction, p2_direction
 );
 
 	logic CLK_25 = 0;

@@ -53,12 +53,23 @@ module toplevel (
 );
 
 logic [31:0] led_export;
-assign LEDR[15:0] = led_export[15:0];
+//assign LEDR[15:0] = led_export[15:0];
 
 // Instantiate Keyboard
-logic [3:0] P1_Keycode, P2_Keycode;
-assign LEDG[3:0] = P1_Keycode;
-keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Keycode);
+logic [7:0] P1_Keycode, P2_Keycode;
+logic [7:0] KEYCODE_RAW;
+assign LEDG[7:0] = P1_Keycode;
+assign LEDR[7:0] = P2_Keycode;
+keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Keycode, .P2_Keycode, .KEYCODE_RAW);
+
+HexDriver hexdrv0 (
+	.In(KEYCODE_RAW[3:0]),
+   .Out(HEX0)
+);
+HexDriver hexdrv1 (
+	.In(KEYCODE_RAW[7:4]),
+   .Out(HEX1)
+);
 
 // synchronize software and hardware, such that software does 1 cycle per frame
 logic frame_synchronizer = 0;
@@ -66,10 +77,10 @@ always_ff @ (posedge VGA_VS)
 begin
 	frame_synchronizer <= ~frame_synchronizer;
 end
-assign LEDR[17] = frame_synchronizer;
 
 // Wires to connect nios system with gpu
 logic [9:0]	 p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation;
+logic p1_direction, p2_direction;
 
 // Instantiation of Qsys design
 nios_system system (
@@ -91,12 +102,14 @@ nios_system system (
 	.export_P2_Keycode(P2_Keycode),  			//           .P2_Keycode
 	.export_p1_x(p1_X),         					//           .p1_x
 	.export_p1_y(p1_Y),         					//           .p1_y
+	.export_p1_direction(p1_direction),
 	.export_p1_width(p1_width),     				//           .p1_width
 	.export_p1_height(p1_height),    			//           .p1_height
 	.export_p1_health(p1_health),    			//           .p1_health
 	.export_p1_animation(p1_animation), 		//           .p1_animation
 	.export_p2_x(p2_X),         					//           .p2_x
 	.export_p2_y(p2_Y),         					//           .p2_y
+	.export_p2_direction(p2_direction),
 	.export_p2_width(p2_width),     				//           .p2_width
 	.export_p2_height(p2_height),    			//           .p2_height
 	.export_p2_health(),    						//           .p2_health

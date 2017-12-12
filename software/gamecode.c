@@ -50,6 +50,7 @@ typedef struct Player_Hardware {
     **/
     volatile unsigned int x;
     volatile unsigned int y;
+    volatile unsigned int direction;
     volatile unsigned int width;
     volatile unsigned int height;
     volatile unsigned int health;
@@ -66,9 +67,10 @@ typedef struct Player_Hardware {
     **/
 } Player_Hardware;
 
-void setDefaultHW(int x, Player_Hardware * hardware) {
+void setDefaultHW(int x, int direction, Player_Hardware * hardware) {
 	hardware->x = x;
 	hardware->y = 400;
+    hardware->direction = 0;
 	hardware->width = 106/2;
 	hardware->height = 160/2;
 	hardware->health = 100;
@@ -206,12 +208,12 @@ int main() {
     Player_Software p1s;
     setDefaultSW(100, &p1s);
     Player_Hardware * p1h = (Player_Hardware *) GAME_INTERFACE; // change
-    setDefaultHW(100, p1h);
+    setDefaultHW(100, 0, p1h);
 
     Player_Software p2s;
     setDefaultSW(400, &p2s);
-    Player_Hardware * p2h = (Player_Hardware *) &GAME_INTERFACE[7]; // change
-    setDefaultHW(400, p2h);
+    Player_Hardware * p2h = (Player_Hardware *) &GAME_INTERFACE[8]; // change
+    setDefaultHW(400, 1, p2h);
 
 	int frame_synchronizer = 1;
 	int vc = 0;

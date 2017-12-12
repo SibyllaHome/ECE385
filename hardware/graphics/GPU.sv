@@ -21,6 +21,7 @@ module GPU (
 					input	logic	[9:0] DrawX, DrawY,
 					// Data from CPU
 					input	logic	[9:0] p1_X, p1_Y, p2_X, p2_Y,
+					input logic p1_direction, p2_direction,
 					input	logic	[9:0] p1_animation, p2_animation,
 					// VRAM Control signals
 					output	logic VRAM_READ_SPRITE,
@@ -97,7 +98,8 @@ module GPU (
 		if (in_p1_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
 			State = ReadSPRITE;
-			VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH + anim_offset_x;
+			if (p1_direction == 0) VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH + anim_offset_x; // direction 0, facing right
+			else  VRAM_X = - DrawX_Inc + p1_X + SPRITE_WIDTH + anim_offset_x; // direction 1 , facing left
 			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT + anim_offset_y;
 			VRAM_READ_SPRITE = 1;
 		end
@@ -105,8 +107,8 @@ module GPU (
 		else if (in_p2_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
 			State = ReadSPRITE;
-			// invert how we read p2's X, since p2 will be facing p1
-			VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_x;
+			if (p2_direction == 0) VRAM_X = DrawX_Inc - p2_X + SPRITE_WIDTH + anim_offset_x; // direction 0, facing right
+			else VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_x; // direction 1 facing left
 			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT + anim_offset_y;
 			VRAM_READ_SPRITE = 1;
 		end

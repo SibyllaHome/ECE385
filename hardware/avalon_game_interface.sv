@@ -37,9 +37,10 @@ module avalon_game_interface (
 
 	// Exported Conduit
 	input logic VGA_VS,
-	input logic [3:0] P1_Keycode, P2_Keycode,
+	input logic [7:0] P1_Keycode, P2_Keycode,
 	output logic [9:0] p1_x, p1_y, p1_width, p1_height, p1_health, p1_animation,
-	output logic [9:0] p2_x, p2_y, p2_width, p2_height, p2_health, p2_animation
+	output logic [9:0] p2_x, p2_y, p2_width, p2_height, p2_health, p2_animation,
+	output logic p1_direction, p2_direction
 	);
 
 
@@ -79,16 +80,18 @@ assign AVL_READDATA = (AVL_CS && AVL_READ) ? AVL_Reg [AVL_ADDR] : 16'b0; // set 
 // Assign export conduit
 assign p1_x = Graphics_Reg[1][9:0];
 assign p1_y = Graphics_Reg[2][9:0];
-assign p1_width = Graphics_Reg[3][9:0];
-assign p1_height = Graphics_Reg[4][9:0];
-assign p1_health = Graphics_Reg[5][9:0];
-assign p1_animation = Graphics_Reg[6][9:0];
+assign p1_direction = Graphics_Reg[3][0];
+assign p1_width = Graphics_Reg[4][9:0];
+assign p1_height = Graphics_Reg[5][9:0];
+assign p1_health = Graphics_Reg[6][9:0];
+assign p1_animation = Graphics_Reg[7][9:0];
 
-assign p2_x = Graphics_Reg[8][9:0];
-assign p2_y = Graphics_Reg[9][9:0];
-assign p2_width = Graphics_Reg[10][9:0];
-assign p2_height = Graphics_Reg[11][9:0];
-assign p2_health = Graphics_Reg[12][9:0];
-assign p2_animation = Graphics_Reg[13][9:0];
+assign p2_x = Graphics_Reg[9][9:0];
+assign p2_y = Graphics_Reg[10][9:0];
+assign p2_direction = Graphics_Reg[11][0];
+assign p2_width = Graphics_Reg[12][9:0];
+assign p2_height = Graphics_Reg[13][9:0];
+assign p2_health = Graphics_Reg[14][9:0];
+assign p2_animation = Graphics_Reg[15][9:0];
 
 endmodule
