@@ -104,6 +104,9 @@ end
 logic [9:0]	 p1_X, p1_Y, p2_X, p2_Y, p1_width, p1_height, p2_width, p2_height, p1_health, p2_health, p1_animation, p2_animation;
 logic p1_direction, p2_direction;
 
+assign LEDR[17] = p1_direction;
+assign LEDR[16] = p2_direction;
+
 // Instantiation of Qsys design
 nios_system system (
 	.clk_clk(CLOCK_50),								// Clock input

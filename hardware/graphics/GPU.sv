@@ -81,9 +81,9 @@ module GPU (
 	assign in_p2_bound = (p2_X < DrawX_Inc + SPRITE_WIDTH && DrawX_Inc < p2_X + SPRITE_WIDTH && p2_Y < DrawY_Inc + SPRITE_HEIGHT && DrawY_Inc < p2_Y + SPRITE_HEIGHT);
 
    // animation offset
-	logic [9:0] animation, anim_offset_x, anim_offset_y;
-	assign animation = (in_p2_bound && !in_p1_bound) ? p2_animation : p1_animation;
-	animation_offset offset0(.animation(animation), .offsetX(anim_offset_x), .offsetY(anim_offset_y));
+	logic [9:0] anim_offset_p1_x, anim_offset_p1_y, anim_offset_p2_x, anim_offset_p2_y;
+	animation_offset offset_p1(.animation(p1_animation), .offsetX(anim_offset_p1_x), .offsetY(anim_offset_p1_y));
+	animation_offset offset_p2(.animation(p2_animation), .offsetX(anim_offset_p2_x), .offsetY(anim_offset_p2_y));
 	
 	// VRAM Control logic
 	always_comb
@@ -98,18 +98,27 @@ module GPU (
 		if (in_p1_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
 			State = ReadSPRITE;
-			if (p1_direction == 0) VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH + anim_offset_x; // direction 0, facing right
-			else  VRAM_X = - DrawX_Inc + p1_X + SPRITE_WIDTH + anim_offset_x; // direction 1 , facing left
-			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT + anim_offset_y;
+			if (p1_direction == 0) VRAM_X = DrawX_Inc - p1_X + SPRITE_WIDTH + anim_offset_p1_x; // direction 0, facing right
+			else  VRAM_X = - DrawX_Inc + p1_X + SPRITE_WIDTH + anim_offset_p1_x; // direction 1 , facing left
+			VRAM_Y = DrawY_Inc - p1_Y + SPRITE_HEIGHT + anim_offset_p1_y;
 			VRAM_READ_SPRITE = 1;
 		end
 		// same logic for p2, p1 takes priority over p2
 		else if (in_p2_bound && (VGA_CLK == 1 || (VGA_CLK == 0 && ~Temp_is_Transparent)))
 		begin
 			State = ReadSPRITE;
-			if (p2_direction == 0) VRAM_X = DrawX_Inc - p2_X + SPRITE_WIDTH + anim_offset_x; // direction 0, facing right
-			else VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_x; // direction 1 facing left
-			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT + anim_offset_y;
+			if (p2_direction == 0) VRAM_X = DrawX_Inc - p2_X + SPRITE_WIDTH + anim_offset_p2_x; // direction 0, facing right
+			else VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_p2_x; // direction 1 facing left
+			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT + anim_offset_p2_y;
+			VRAM_READ_SPRITE = 1;
+		end
+		// draw p2 if in bound and p1 is transparent
+		if ((VGA_CLK == 0 && Temp_is_Transparent) && in_p2_bound && in_p1_bound)
+		begin
+			State = ReadSPRITE;
+			if (p2_direction == 0) VRAM_X = DrawX_Inc - p2_X + SPRITE_WIDTH + anim_offset_p2_x; // direction 0, facing right
+			else VRAM_X = - DrawX_Inc + p2_X + SPRITE_WIDTH + anim_offset_p2_x; // direction 1 facing left
+			VRAM_Y = DrawY_Inc - p2_Y + SPRITE_HEIGHT + anim_offset_p2_y;
 			VRAM_READ_SPRITE = 1;
 		end
 	end
