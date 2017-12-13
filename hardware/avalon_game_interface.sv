@@ -66,7 +66,7 @@ begin
 	end
 	// store keycode on every cycle
 	AVL_Reg[0] <= P1_Keycode;
-	AVL_Reg[7] <= P2_Keycode;
+	AVL_Reg[8] <= P2_Keycode;
 end
 
 always_ff @ (negedge VGA_VS) 

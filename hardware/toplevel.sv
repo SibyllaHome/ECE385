@@ -53,7 +53,38 @@ module toplevel (
 );
 
 logic [31:0] led_export;
-//assign LEDR[15:0] = led_export[15:0];
+HexDriver hexdrv0 (
+	.In(led_export[3:0]),
+   .Out(HEX0)
+);
+HexDriver hexdrv1 (
+	.In(led_export[7:4]),
+   .Out(HEX1)
+);
+HexDriver hexdrv2 (
+	.In(led_export[11:8]),
+   .Out(HEX2)
+);
+HexDriver hexdrv3 (
+	.In(led_export[15:12]),
+   .Out(HEX3)
+);
+HexDriver hexdrv4 (
+	.In(led_export[19:16]),
+   .Out(HEX4)
+);
+HexDriver hexdrv5 (
+	.In(led_export[23:20]),
+   .Out(HEX5)
+);
+HexDriver hexdrv6 (
+	.In(led_export[27:24]),
+   .Out(HEX6)
+);
+HexDriver hexdrv7 (
+	.In(led_export[31:28]),
+   .Out(HEX7)
+);
 
 // Instantiate Keyboard
 logic [7:0] P1_Keycode, P2_Keycode;
@@ -61,15 +92,6 @@ logic [7:0] KEYCODE_RAW;
 assign LEDG[7:0] = P1_Keycode;
 assign LEDR[7:0] = P2_Keycode;
 keyboard_controller kb_c_0(.CLK_50(CLOCK_50), .psClk(PS2_KBCLK), .psData(PS2_KBDAT), .RESET_H(~KEY[0]), .P1_Keycode, .P2_Keycode, .KEYCODE_RAW);
-
-HexDriver hexdrv0 (
-	.In(KEYCODE_RAW[3:0]),
-   .Out(HEX0)
-);
-HexDriver hexdrv1 (
-	.In(KEYCODE_RAW[7:4]),
-   .Out(HEX1)
-);
 
 // synchronize software and hardware, such that software does 1 cycle per frame
 logic frame_synchronizer = 0;
@@ -120,7 +142,5 @@ nios_system system (
 
 // Instantiate GPU
 graphics_module graphics_0(.CLK_50(CLOCK_50), .RESET_H(~KEY[0]), .*);
-
-
 
 endmodule

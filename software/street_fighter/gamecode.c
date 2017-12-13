@@ -100,7 +100,7 @@ void updateMovement(Player_Software * player, Player_Hardware * hardware) {
     }
 }
 void performMovement(Player_Software * player, Player_Hardware * hardware) {
-	if (hardware->animation != 5) { // don't move while landing
+	if (player->movement_state != Landing) { // don't move while landing
 		if ((player->movement_state == Move_Right) || (player->movement_state == Jump_Right)) {
 			if (player->x + 5 < screenWidth - player_sizeX) player->x += 5;
 		}
@@ -108,7 +108,12 @@ void performMovement(Player_Software * player, Player_Hardware * hardware) {
 			if (player->x + 5 > player_sizeX) player->x -= 5;
 		}
 		if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Left) || (player->movement_state == Jump_Right)) {
-			if (player->y + player->animation_cycle - 15 <= 400) player->y += player->animation_cycle - 15;
+			if (player->y > 400) { // hit 400, land
+				player->y = 400;
+				player->movement_state = Landing;
+			}
+			else if (hardware->animation == 3) player->y -= 1;
+			else if (hardware->animation == 4) player->y += 1;
 		}
 		// set x and y
 		hardware->x = player->x;
@@ -124,16 +129,15 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
                 if (hardware->animation == 0) hardware->animation = 2;
                 else hardware->animation = 0;
             }
-            if (player->movement_state == Move_Left || player->movement_state == Move_Right) {
+            else if (player->movement_state == Move_Left || player->movement_state == Move_Right) {
                 if (hardware->animation == 1) hardware->animation = 0; // swap between standing and moving when moving
                 else hardware->animation = 1;
             }
-            if (player->movement_state == Jump_Up || player->movement_state == Jump_Right || player->movement_state == Jump_Left) {
+            else if (player->movement_state == Jump_Up || player->movement_state == Jump_Right || player->movement_state == Jump_Left) {
                 if (hardware->animation == 3) hardware->animation = 4; // change from going up to going down
-                if (hardware->animation == 4) hardware->animation = 5; // perform landing
-                if (hardware->animation == 5) {
-                	player->movement_state = Standing;
-                }
+            }
+            else if (player->movement_state == Landing) {
+                player->movement_state = Standing;
             }
             player->animation_cycle = 0; // reset animation counter at end of .5 seconds
         }
@@ -143,6 +147,7 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
         if (player->movement_state == Standing) hardware->animation = 0;
         if (player->movement_state == Move_Right || player->movement_state == Move_Left) hardware->animation = 1;
         if (player->movement_state == Jump_Up || player->movement_state == Jump_Left || player->movement_state == Jump_Right) hardware->animation = 3;
+        if (player->movement_state == Landing) hardware->animation = 5;
         player->last_movement_state = player->movement_state;
         player->animation_cycle = 0; // reset animation counter at start of different movement
     }
@@ -212,27 +217,25 @@ int main() {
 
     Player_Software p2s;
     setDefaultSW(400, &p2s);
-    Player_Hardware * p2h = (Player_Hardware *) &GAME_INTERFACE[8]; // change
+    Player_Hardware * p2h = (Player_Hardware *) &(GAME_INTERFACE[8]); // change
     setDefaultHW(400, 1, p2h);
 
 	int frame_synchronizer = 1;
-	int vc = 0;
     while (1) {
-    	if (frame_synchronizer != *VGA_VS_PIO) {vc++;}
+    	if (frame_synchronizer != *VGA_VS_PIO) {}
     	else {
-    		printf("%d\n",vc);
-    		vc = 0;
+    		frame_synchronizer = !frame_synchronizer;
 
     		updateMovement(&p1s,p1h); updateMovement(&p2s,p2h);
-            performMovement(&p1s,p1h); performMovement(&p2s,p2h);
     		drawMovementAnimation(&p1s,p1h); drawMovementAnimation(&p2s,p2h);
+            performMovement(&p1s,p1h); performMovement(&p2s,p2h);
+
+    		printf("1x: %d  1y:  %d   2x: %d  2y:  %d\n", p1s.x, p1s.y, p2s.x, p2s.y);
 
             updateActions(&p1s, p1h); updateActions(&p2s, p2h);
             if (rand()%2) { performActions(&p1s,p1h,&p2s,p2h); performActions(&p2s,p2h,&p1s,p1h); }  // randomize who will win keep press speed battle
             else { performActions(&p2s,p2h,&p1s,p1h); performActions(&p1s,p1h,&p2s,p2h); }
-            drawActionAnimation(&p1s, p1h); drawActionAnimation(&p2s, p2h)
-
-    		frame_synchronizer = !frame_synchronizer;
+            drawActionAnimation(&p1s, p1h); drawActionAnimation(&p2s, p2h);
     	}
     }
 }
