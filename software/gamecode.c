@@ -84,8 +84,8 @@ void setDefaultHW(int x, int direction, Player_Hardware * hardware) {
 
 void updateMovement(Player_Software * player, Player_Hardware * hardware) {
 	unsigned mvt_keycode = hardware->keycode & 0x0f;
-
-    if ((player->movement_state == Standing || player->movement_state == Move_Left || player->movement_state == Move_Right) && player->action_state != Dying && player->action_state != Dead) { // only allow new movements when on the ground
+	// lockout movements in certain states
+    if ((player->movement_state == Standing || player->movement_state == Move_Left || player->movement_state == Move_Right) && player->action_state != Dying && player->action_state != Dead) {
     	if(mvt_keycode == 0) { // none being pressed
     		player->movement_state = Standing;
     	}
@@ -105,12 +105,14 @@ void updateMovement(Player_Software * player, Player_Hardware * hardware) {
             player->movement_state = Jump_Up_Right;
         }
     }
+	// change from jump up to down automatically after a few cycle
     if (((player->movement_state == Jump_Up) || (player->movement_state == Jump_Up_Left) || (player->movement_state == Jump_Up_Right)) && player->animation_cycle == 20) {
     	if (player->movement_state == Jump_Up) player->movement_state = Jump_Down;
     	else if (player->movement_state == Jump_Up_Left) player->movement_state = Jump_Down_Left;
     	else if (player->movement_state == Jump_Up_Right) player->movement_state = Jump_Down_Right;
     	player->animation_cycle = 0;
     }
+	// change from jumping to landing
     else if (((player->movement_state == Jump_Down) || (player->movement_state == Jump_Down_Left) || (player->movement_state == Jump_Down_Right)) && player->y >= 400) {
     	player->y = 400;
         player->movement_state = Landing;
@@ -125,6 +127,7 @@ void performMovement(Player_Software * player, Player_Hardware * hardware) {
 		else if ((player->movement_state == Move_Left) || (player->movement_state == Jump_Up_Left) || (player->movement_state == Jump_Down_Left)) {
 			if (player->x + 5 > player_sizeX) player->x -= 5;
 		}
+		// jumping has acceleration based on animaiton cycle
 		if ((player->movement_state == Jump_Up) || (player->movement_state == Jump_Up_Left) || (player->movement_state == Jump_Up_Right)) {
 			player->y -= abs(player->animation_cycle - 30)/2;
 		}
@@ -138,6 +141,7 @@ void performMovement(Player_Software * player, Player_Hardware * hardware) {
 }
 
 void setDirection(Player_Software * player_1, Player_Hardware * hardware_1, Player_Software * player_2, Player_Hardware * hardware_2) {
+	// set direction players are facing
 	if (player_1->x > player_2->x) {
 		if (player_1->action_state != Dying && player_1->action_state != Dead) hardware_1->direction = 1;
 		if (player_2->action_state != Dying && player_2->action_state != Dead) hardware_2->direction = 0;
@@ -196,9 +200,7 @@ void updateActions(Player_Software * player, Player_Hardware * hardware) {
 }
 
 void performActions(Player_Software * player_1, Player_Hardware * hardware_1, Player_Software * player_2, Player_Hardware * hardware_2) {
-//    if (player_1->action_state != 0 && hardware_1 == 0x00000040) {
-//    	printf("action: %d ", player_1->action_state);
-//    }
+
 	if (player_1->action_state == Punching) {
         if (player_1->action_cycle == 5 && ( player_2->action_state != Dying && player_2->action_state != Dead) ) { // perform damage in 5th action cycle
             if (abs(player_1->x - player_2->x) < player_sizeX && abs(player_1->y - player_2->y) < player_sizeY) { // player's are in bound of each other, will do damage to other player
@@ -213,14 +215,14 @@ void performActions(Player_Software * player_1, Player_Hardware * hardware_1, Pl
         }
         else {player_1->action_cycle++;}
     }
-    else if (player_1->action_state == Taking_Damage) { // recover after 10 cycles
+    else if (player_1->action_state == Taking_Damage) { // recover after 15 cycles
         if (player_1->action_cycle == 7) {
             player_1->action_state = None;
             player_1->action_cycle = 0;
         }
         else { player_1->action_cycle++; }
     }
-    else if (player_1->action_state == Dying) { // recover after 10 cycles
+    else if (player_1->action_state == Dying) { // recover after 15 cycles
 		if (player_1->action_cycle == 15) {
 			player_1->action_state = Dead;
 			player_1->action_cycle = 0;
@@ -286,7 +288,8 @@ int main() {
     	if (frame_synchronizer != *VGA_VS_PIO) {}
     	else {
     		frame_synchronizer = !frame_synchronizer;
-
+			
+			// Reset game
     		if (p2h->keycode == 4 && p1h->keycode == 4) {
     			setDefaultSW(100, &p1s);
     			setDefaultSW(540, &p2s);
