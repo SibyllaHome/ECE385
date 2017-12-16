@@ -59,6 +59,16 @@ begin
 	endcase
 end
 
-keyboard kb_0(.Clk(CLK_50), .psClk, .psData, .reset(RESET_H), .keyCode, .press);
-									 
+
+// synchronize psClk and psData
+logic psClk_s, psData_s;
+
+always_ff @ (posedge CLK_50)
+begin
+	psClk_s <= psClk;
+	psData_s <= psData;
+end
+
+keyboard kb_0(.Clk(CLK_50), .psClk(psClk_s), .psData(psData_s), .reset(RESET_H), .keyCode, .press);
+
 endmodule

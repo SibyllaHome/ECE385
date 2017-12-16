@@ -66,6 +66,9 @@ typedef struct Player_Hardware {
     5) Jump (landing)
     6) Punching
     7) Blocking
+    8) Damaged
+    9) Dying
+    10) Dead
     **/
 } Player_Hardware;
 
@@ -82,7 +85,7 @@ void setDefaultHW(int x, int direction, Player_Hardware * hardware) {
 void updateMovement(Player_Software * player, Player_Hardware * hardware) {
 	unsigned mvt_keycode = hardware->keycode & 0x0f;
 
-    if (player->movement_state == Standing || player->movement_state == Move_Left || player->movement_state == Move_Right) { // only allow new movements when on the ground
+    if ((player->movement_state == Standing || player->movement_state == Move_Left || player->movement_state == Move_Right) && player->action_state != Dying && player->action_state != Dead) { // only allow new movements when on the ground
     	if(mvt_keycode == 0) { // none being pressed
     		player->movement_state = Standing;
     	}
@@ -179,7 +182,7 @@ void drawMovementAnimation(Player_Software * player, Player_Hardware * hardware)
 }
 
 void updateActions(Player_Software * player, Player_Hardware * hardware) {
-    if (player->action_state != Taking_Damage && player->action_state != Punching) { // lock player out from doing actions when taking_damage or mid punch
+    if (player->action_state != Taking_Damage && player->action_state != Punching && player->action_state != Dying && player->action_state != Dead) { // lock player out from doing actions when taking_damage or mid punch
         if (hardware->keycode >> 6 == 0) { // release of button resets action state
             player->action_state = None;
         }
@@ -193,8 +196,11 @@ void updateActions(Player_Software * player, Player_Hardware * hardware) {
 }
 
 void performActions(Player_Software * player_1, Player_Hardware * hardware_1, Player_Software * player_2, Player_Hardware * hardware_2) {
-    if (player_1->action_state == Punching) {
-        if (player_1->action_cycle == 5) { // perform damage in 5th action cycle
+//    if (player_1->action_state != 0 && hardware_1 == 0x00000040) {
+//    	printf("action: %d ", player_1->action_state);
+//    }
+	if (player_1->action_state == Punching) {
+        if (player_1->action_cycle == 5 && ( player_2->action_state != Dying && player_2->action_state != Dead) ) { // perform damage in 5th action cycle
             if (abs(player_1->x - player_2->x) < player_sizeX && abs(player_1->y - player_2->y) < player_sizeY) { // player's are in bound of each other, will do damage to other player
                 player_2->health = (player_2->action_state == Blocking) ? player_2->health - 5 : player_2->health - 10; // if player 2 was blocking, less damage recieved
                 player_2->action_state = Taking_Damage;
@@ -208,18 +214,18 @@ void performActions(Player_Software * player_1, Player_Hardware * hardware_1, Pl
         else {player_1->action_cycle++;}
     }
     else if (player_1->action_state == Taking_Damage) { // recover after 10 cycles
-        if (player_1->action_cycle == 10) {
+        if (player_1->action_cycle == 7) {
             player_1->action_state = None;
             player_1->action_cycle = 0;
         }
-        else { player_1->action_state++; }
+        else { player_1->action_cycle++; }
     }
     else if (player_1->action_state == Dying) { // recover after 10 cycles
-		if (player_1->action_cycle == 20) {
+		if (player_1->action_cycle == 15) {
 			player_1->action_state = Dead;
 			player_1->action_cycle = 0;
 		}
-		else { player_1->action_state++; }
+		else { player_1->action_cycle++; }
 	}
 }
 
@@ -235,19 +241,26 @@ void drawActionAnimation(Player_Software * player, Player_Hardware * hardware) {
         hardware->animation = 7;
     }
     else if (player->action_state == Taking_Damage) {
+    	printf("damage");
         hardware->animation = 8;
     }
     else if (player->action_state == Dying) {
-		hardware->animation = 10;
+    	printf("dying");
+		hardware->animation = 9;
 	}
     else if (player->action_state == Dead) {
+    	printf("dead");
     	hardware->animation = 10;
     }
 
 }
 void checkHealth(Player_Software * player, Player_Hardware * hardware) {
 	if (player->health <= 0) {
-		player->action_state = Dying;
+		if (game_state == 1) {
+			player->action_state = Dying;
+		}
+		player->health = 0;
+		hardware->health = 0;
 		game_state = 0;
 	}
 
@@ -255,16 +268,16 @@ void checkHealth(Player_Software * player, Player_Hardware * hardware) {
 
 
 int main() {
-	// initialize players
+	// initialize player
     Player_Software p1s;
     setDefaultSW(100, &p1s);
     Player_Hardware * p1h = (Player_Hardware *) GAME_INTERFACE; // change
     setDefaultHW(100, 0, p1h);
 
     Player_Software p2s;
-    setDefaultSW(400, &p2s);
+    setDefaultSW(540, &p2s);
     Player_Hardware * p2h = (Player_Hardware *) &(GAME_INTERFACE[8]); // change
-    setDefaultHW(400, 1, p2h);
+    setDefaultHW(540, 1, p2h);
 
     game_state = 1;
 
@@ -274,14 +287,21 @@ int main() {
     	else {
     		frame_synchronizer = !frame_synchronizer;
 
+    		if (p2h->keycode == 4 && p1h->keycode == 4) {
+    			setDefaultSW(100, &p1s);
+    			setDefaultSW(540, &p2s);
+    			setDefaultHW(100, 0, p1h);
+    			setDefaultHW(540, 1, p2h);
+    			game_state = 1;
+    		}
+
 			updateMovement(&p1s,p1h); updateMovement(&p2s,p2h);
 			performMovement(&p1s,p1h); performMovement(&p2s,p2h);
 			drawMovementAnimation(&p1s,p1h); drawMovementAnimation(&p2s,p2h);
 			setDirection(&p1s,p1h,&p2s,p2h);
 
 			updateActions(&p1s, p1h); updateActions(&p2s, p2h);
-			if (rand()%2) { performActions(&p1s,p1h,&p2s,p2h); performActions(&p2s,p2h,&p1s,p1h); }  // randomize who will win keep press speed battle
-			else { performActions(&p2s,p2h,&p1s,p1h); performActions(&p1s,p1h,&p2s,p2h); }
+			performActions(&p1s,p1h,&p2s,p2h); performActions(&p2s,p2h,&p1s,p1h);  // randomize who will win keep press speed battle
 			checkHealth(&p1s, p1h); checkHealth(&p2s, p2h);
 			drawActionAnimation(&p1s, p1h); drawActionAnimation(&p2s, p2h);
 			printf("heathp1: %d    heathp2: %d\n", p1s.health, p2s.health);

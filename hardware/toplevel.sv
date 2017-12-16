@@ -137,7 +137,7 @@ nios_system system (
 	.export_p2_direction(p2_direction),
 	.export_p2_width(p2_width),     				//           .p2_width
 	.export_p2_height(p2_height),    			//           .p2_height
-	.export_p2_health(),    						//           .p2_health
+	.export_p2_health(p2_health),    						//           .p2_health
 	.export_p2_animation(p2_animation), 		//           .p2_animation
 	.led_pio_out_export(led_export),					// PIO
 	.vga_vs_pio_in_export(frame_synchronizer)

@@ -53,14 +53,16 @@ module GPU (
 	Temp_RGB <= VRAM_RGB;
 	end
 	
-	logic drawhealth_p1 = DrawX >= 50 && DrawX <= 250 && DrawY >= 100 && DrawY <= 150;
-	logic drawhealth_p2 = DrawX >= 390 && DrawX <= 590 && DrawY >= 100 && DrawY <= 150;
+	logic drawhealth_p1;
+	assign drawhealth_p1 = (DrawX >= 25) && (DrawX <= 225) && (DrawY >= 25) && (DrawY <= 50);
+	logic drawhealth_p2;
+	assign drawhealth_p2 = (DrawX >= 415) && (DrawX <= 615) && (DrawY >= 25) && (DrawY <= 50);
 
 	always_ff @ (posedge VGA_CLK) // Latch RGB at start of VGA clock
 	begin
-		if (drawhealth_p1) {VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= (50 + (p1_health * 2) <= DrawX) ? 8'b00011100 : 8'b11100000
-		else if (drawhealth_p2) {VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= (590 - (p1_health * 2) >= DrawX) ? 8'b00011100 : 8'b11100000
-		{VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= VRAM_RGB;
+		if (drawhealth_p1) {VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= (25 + (p1_health * 2) >= DrawX) ? 8'b00011100 : 8'b11100000;
+		else if (drawhealth_p2) {VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= (615 - (p2_health * 2) <= DrawX) ? 8'b00011100 : 8'b11100000;
+		else {VGA_R[7:5], VGA_G[7:5], VGA_B[7:6]} <= VRAM_RGB;
 	end
 
 	// Increment original DrawX by 1 since the RGB value will be 1 VGA_Clock late
